@@ -43,9 +43,9 @@
   [low]
   (->> {:memory {[0 0] 1 [1 0] 1} :position [1 0] :direction [1 0]}
        (iterate (comp grid-allocate grid-step))
-       (drop-while #(< (grid-value %) low))
-       (first)
-       (grid-value)))
+       (map grid-value)
+       (drop-while #(<= % low))
+       (first)))
 
 {:part-1 (distance 368078)
  :part-2 (next-grid-value 368078)}
