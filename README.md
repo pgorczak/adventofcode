@@ -1,4 +1,6 @@
-# Advent of Code
+# Advent of Code in Clojure
+
+*Best enjoyed with Emacs and Cider*
 
 * Open a file
 * `cider-jack-in`
