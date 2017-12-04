@@ -2,16 +2,11 @@
 
 (def input (slurp (clojure.java.io/resource "2017-4")))
 
-(defn p1-valid?
-  "All words must be unique."
-  [words]
-  (= (count words) (count (set words))))
+(defn distinct-words? [words]
+  (apply distinct? words))
 
-(defn p2-valid?
-  "All normalized words must be unique."
-  [words]
-  (let [nws (map sort words)]
-    (= (count nws) (count (set nws)))))
+(defn distinct-anagrams? [words]
+  (->> (map sort words) (apply distinct?)))
 
 (defn valid-phrases [pred list]
   (->> list
@@ -20,5 +15,5 @@
        (filter pred)
        (count)))
 
-{:part-1 (valid-phrases p1-valid? input)
- :part-2 (valid-phrases p2-valid? input)}
+{:part-1 (valid-phrases distinct-words? input)
+ :part-2 (valid-phrases distinct-anagrams? input)}
