@@ -1,3 +1,4 @@
 (set-env!
-  :source-paths #{"src"}
-  :dependencies '[[org.clojure/clojure "1.8.0"]])
+ :source-paths #{"src"}
+ :resource-paths #{"inputs"}
+ :dependencies '[[org.clojure/clojure "1.8.0"]])
