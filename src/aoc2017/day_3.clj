@@ -1,6 +1,7 @@
 (ns aoc2017.day-3)
 
-(defn p1-distance [x]
+(defn distance
+  [x]
   (let [square-value (-> x (Math/sqrt) (Math/ceil)
                          ((fn [a] (if (zero? (mod a 2)) (inc a) a))))
         square-side (dec square-value)
@@ -9,33 +10,41 @@
                    Math/abs (* -1) (+ (/ square-side 2)))]
     (int (- square-side offset))))
 
+(defn step
+  [[x y] [dx dy]]
+  [(+ x dx) (+ y dy)])
 
-(defn p2-grid-memory [x]
-  (let [step (fn [[x y] [dx dy]] [(+ x dx) (+ y dy)])
-        left-turn (fn [[x y]] [(- y) x])
-        left-free? (fn [memory position direction]
-                     (not (contains? memory (step position
-                                                  (left-turn direction)))))
-        neighbors (fn [position]
-                    (let [straight (->> (iterate left-turn [1 0]) (take 4))
-                          diagonal (->> (iterate left-turn [1 1]) (take 4))]
-                      (map #(step position %) (concat straight diagonal))))
-        current-value (fn [{m :memory p :position}] (get m p))
-        next-state (fn [{m :memory p :position d :direction :as state}]
-                     (let [new-d (if (left-free? m p d) (left-turn d) d)
-                           new-p (step p new-d)
-                           new-p-value (->> (neighbors new-p)
-                                            (map #(get m % 0))
-                                            (reduce +))]
-                       (-> state
-                           (assoc :position new-p :direction new-d)
-                           (assoc-in [:memory new-p] new-p-value))))]
+(defn left-turn
+  [[x y]]
+  [(- y) x])
 
-    (->> {:memory {[0 0] 1 [1 0] 1} :position [1 0] :direction [1 0]}
-         (iterate next-state)
-         (drop-while #(< (current-value %) x))
-         (first)
-         (current-value))))
+(defn grid-step
+  [{m :memory p :position d :direction :as state}]
+  (let [left-taken? (->> (left-turn d) (step p) (contains? m))
+        new-d (if left-taken? d (left-turn d))]
+    (assoc state :position (step p new-d) :direction new-d)))
 
-{:part-1 (p1-distance 368078)
- :part-2 (p2-grid-memory 368078)}
+(defn grid-allocate
+  [{m :memory p :position d :direction :as state}]
+  (let [straight (->> (iterate left-turn [1 0]) (take 4))
+        diagonal (->> (iterate left-turn [1 1]) (take 4))
+        neighborhood (concat straight diagonal)]
+    (->> (map #(step p %) neighborhood)
+         (map #(get m % 0))
+         (reduce +)
+         (assoc-in state [:memory p]))))
+
+(defn grid-value
+  [{m :memory p :position}]
+  (get m p))
+
+(defn next-grid-value
+  [low]
+  (->> {:memory {[0 0] 1 [1 0] 1} :position [1 0] :direction [1 0]}
+       (iterate (comp grid-allocate grid-step))
+       (drop-while #(< (grid-value %) low))
+       (first)
+       (grid-value)))
+
+{:part-1 (distance 368078)
+ :part-2 (next-grid-value 368078)}
