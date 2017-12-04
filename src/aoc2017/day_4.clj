@@ -7,17 +7,11 @@
   [words]
   (= (count words) (count (set words))))
 
-(defn char-counts
-  "foo -> {f: 1 o: 2}"
-  [w]
-  (let [count-char (fn [acc c] (->> (get acc c 0) inc (assoc acc c)))]
-    (reduce count-char {} w)))
-
 (defn p2-valid?
-  "All char-counts must be unique."
+  "All normalized words must be unique."
   [words]
-  (let [ccs (map char-counts words)]
-    (= (count ccs) (count (set ccs)))))
+  (let [nws (map sort words)]
+    (= (count nws) (count (set nws)))))
 
 (defn valid-phrases [pred list]
   (->> list
