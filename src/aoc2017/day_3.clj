@@ -20,19 +20,20 @@
 
 (defn grid-step
   [{m :memory p :position d :direction :as state}]
-  (let [left-taken? (->> (left-turn d) (step p) (contains? m))
-        new-d (if left-taken? d (left-turn d))]
-    (assoc state :position (step p new-d) :direction new-d)))
+  (let [d-left (left-turn d)
+        p-left (step p d-left)]
+    (if (contains? m p-left)
+      (assoc state :position (step p d))
+      (assoc state :position p-left :direction d-left))))
+
+(def neighborhood [[1 0] [1 1] [0 1] [-1 1] [-1 0] [-1 -1] [0 -1] [1 -1]])
 
 (defn grid-allocate
   [{m :memory p :position d :direction :as state}]
-  (let [straight (->> (iterate left-turn [1 0]) (take 4))
-        diagonal (->> (iterate left-turn [1 1]) (take 4))
-        neighborhood (concat straight diagonal)]
-    (->> (map #(step p %) neighborhood)
-         (map #(get m % 0))
-         (reduce +)
-         (assoc-in state [:memory p]))))
+  (->> (map #(step p %) neighborhood)
+       (map #(get m % 0))
+       (reduce +)
+       (assoc-in state [:memory p])))
 
 (defn grid-value
   [{m :memory p :position}]
