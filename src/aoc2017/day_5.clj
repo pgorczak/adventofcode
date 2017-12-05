@@ -12,5 +12,6 @@
         ctr
         (recur (update off idx update-fn) (+ idx (get off idx)) (inc ctr))))))
 
-{:part1 (exit-maze offsets inc)
- :part2 (exit-maze offsets (fn [o] (if (>= o 3) (dec o) (inc o))))}
+(defn solve []
+  {:part1 (exit-maze offsets inc)
+   :part2 (exit-maze offsets (fn [o] (if (>= o 3) (dec o) (inc o))))})

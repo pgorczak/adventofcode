@@ -47,5 +47,6 @@
        (drop-while #(<= % low))
        (first)))
 
-{:part-1 (distance 368078)
- :part-2 (next-grid-value 368078)}
+(defn solve []
+  {:part-1 (distance 368078)
+   :part-2 (next-grid-value 368078)})

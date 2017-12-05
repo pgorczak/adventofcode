@@ -1,10 +1,6 @@
 # Advent of Code in Clojure
 
-*Best enjoyed with Emacs and Cider*
+*Use Boot for ALL the things.*
 
-* Open a file
-* `cider-jack-in`
-* `cider-load-buffer` (C-c C-k)
-* See echo area or jump to end and (C-c C-p)
-
-**Inputs** go in *inputs/year-day* e.g. *inputs/2017-4*.
+* Save inputs to *inputs/year-day* e.g. *inputs/2017-4*.
+* Solve puzzles with `boot solve -y year -d day` e.g. `boot solve -y 2017 -d 4`.

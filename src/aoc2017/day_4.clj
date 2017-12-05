@@ -15,5 +15,6 @@
        (filter pred)
        (count)))
 
-{:part-1 (valid-phrases distinct-words? input)
- :part-2 (valid-phrases distinct-anagrams? input)}
+(defn solve []
+  {:part-1 (valid-phrases distinct-words? input)
+   :part-2 (valid-phrases distinct-anagrams? input)})
