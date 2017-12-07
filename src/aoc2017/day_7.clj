@@ -29,28 +29,30 @@
         (into {})
         (assoc (get tree node) :children))))
 
-(defn make-message [{id :ids ws :weights acc :acc-weights}]
-  (let [acc-freqs (frequencies acc)
-        wrong-acc-weight (apply min-key acc-freqs acc)
-        right-acc-weight (apply max-key acc-freqs acc)
-        wrong-id (get (->> (map vector acc id) (into {})) wrong-acc-weight)
-        wrong-weight (get (->> (map vector id ws) (into {})) wrong-id)
-        right-weight (+ wrong-weight (- right-acc-weight wrong-acc-weight))]
-    (str "weight of " wrong-id " should be " right-weight)))
+(defn minority-majority [c]
+  (let [fs (frequencies c)]
+    [(apply min-key fs c) (apply max-key fs c)]))
+
+(defn at-index-of [v c a]
+  (nth a (-> c vec (.indexOf v))))
+
+(defn make-message [nested-cn acc-weights]
+  (let [[bad-acc good-acc] (minority-majority acc-weights)
+        id (at-index-of bad-acc acc-weights (keys nested-cn))
+        bad-weight (get-in nested-cn [id :weight])
+        good-weight (+ bad-weight (- good-acc bad-acc))]
+    (str "weight of " id " should be " good-weight)))
 
 (defn check-balance [{node-w :weight nested-cn :children}]
   (if (empty? nested-cn)
     node-w
     (let [c-balances (->> nested-cn vals (map check-balance))]
-      (if (every? number? c-balances)
-        (if (apply = c-balances)
-          (apply + node-w c-balances)
-          (make-message
-           {:ids (keys nested-cn)
-            :weights (->> nested-cn vals (map :weight))
-            :acc-weights c-balances}))
-        (->> c-balances (remove number?) first)))))
+      (if (apply = c-balances)
+        (apply + node-w c-balances)
+        (-> (make-message nested-cn c-balances) (Exception.) throw)))))
 
 (defn solve []
   {:part-1 (root input-tree)
-   :part-2 (-> input-tree nested check-balance)})
+   :part-2 (try
+            (-> input-tree nested check-balance)
+            (catch Exception e (.getMessage e)))})
