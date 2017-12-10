@@ -11,21 +11,21 @@
 
 (defn process [s]
   (loop [[c & r] s
-         level 0
-         garbage? false
-         score 0
-         g-count 0]
+         state {:level 0 :garbage? false}
+         acc {:score 0 :garbage 0}]
     (cond
-      (nil? c) {:score score :garbage-count g-count}
-      (= \! c) (recur (drop 1 r) level garbage? score g-count)
-      garbage? (if (= c \>) (recur r level false score g-count)
-                            (recur r level true score (inc g-count)))
-      (= \< c) (recur r level true score g-count)
-      (= \{ c) (recur r (inc level) garbage? score g-count)
-      (= \} c) (recur r (dec level) garbage? (+ score level) g-count)
-      :else (recur r level garbage? score g-count))))
+      (nil? c) acc
+      (= \! c) (recur (drop 1 r) state acc)
+      (:garbage? state) (if (= c \>)
+                            (recur r (assoc state :garbage? false) acc)
+                            (recur r state (update acc :garbage inc)))
+      (= \< c) (recur r (assoc state :garbage? true) acc)
+      (= \{ c) (recur r (update state :level inc) acc)
+      (= \} c) (recur r (update state :level dec)
+                        (update acc :score + (:level state)))
+      :else (recur r state acc))))
 
 (defn solve []
-  (let [{p1 :score p2 :garbage-count} (process input-stream)]
+  (let [{p1 :score p2 :garbage} (process input-stream)]
     {:part-1 p1
      :part-2 p2}))
