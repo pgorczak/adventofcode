@@ -7,8 +7,6 @@
      (if (>= chr 0)
        (cons (char chr) (lazy-seq (char-seq rdr))))))
 
-(def input-stream (-> "2017-9" io/resource io/reader char-seq))
-
 (defn process [s]
   (loop [[c & r] s
          state {:level 0 :garbage? false}
@@ -26,6 +24,7 @@
       :else (recur r state acc))))
 
 (defn solve []
-  (let [{p1 :score p2 :garbage} (process input-stream)]
+  (let [input-stream (-> "2017-9" io/resource io/reader char-seq)
+        {p1 :score p2 :garbage} (process input-stream)]
     {:part-1 p1
      :part-2 p2}))

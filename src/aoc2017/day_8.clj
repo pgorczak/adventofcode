@@ -2,8 +2,6 @@
   (:require [clojure.java.io :as io]
             [clojure.string :as str]))
 
-(def input-lines (-> "2017-8" io/resource io/reader line-seq))
-
 (def ops {"inc" + "dec" - ">" > ">=" >= "==" = "<=" <= "<" < "!=" not=})
 
 (defn parse-op [s]
@@ -23,13 +21,13 @@
         pred-op (-> pred-str parse-op make-apply)]
     (fn [coll] (if (pred-op coll) (update-op coll) coll))))
 
-(def instrs (map line->instruction input-lines))
-
 (defn solve []
-  {:part-1 (->> (reduce #(%2 %1) {} instrs)
-                vals
-                (apply max))
-   :part-2 (->> (reductions #(%2 %1) {} instrs)
-                (keep vals)
-                (apply concat)
-                (apply max))})
+  (let [input-lines (-> "2017-8" io/resource io/reader line-seq)
+        instrs (map line->instruction input-lines)]
+    {:part-1 (->> (reduce #(%2 %1) {} instrs)
+                  vals
+                  (apply max))
+     :part-2 (->> (reductions #(%2 %1) {} instrs)
+                  (keep vals)
+                  (apply concat)
+                  (apply max))}))

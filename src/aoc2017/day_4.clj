@@ -1,7 +1,5 @@
 (ns aoc2017.day-4)
 
-(def input (slurp (clojure.java.io/resource "2017-4")))
-
 (defn distinct-words? [words]
   (apply distinct? words))
 
@@ -16,5 +14,6 @@
        (count)))
 
 (defn solve []
-  {:part-1 (valid-phrases distinct-words? input)
-   :part-2 (valid-phrases distinct-anagrams? input)})
+  (let [input (slurp (clojure.java.io/resource "2017-4"))]
+    {:part-1 (valid-phrases distinct-words? input)
+     :part-2 (valid-phrases distinct-anagrams? input)}))

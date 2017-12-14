@@ -2,15 +2,11 @@
   (:require [clojure.java.io :as io]
             [clojure.string :as str]))
 
-(def input-lines (-> "2017-7" io/resource io/reader line-seq))
-
 (defn parse-line [l]
   (let [normalized (str/replace l #"[\(\),]" "")
         [id weight _ & children] (str/split normalized #" ")]
     [id {:weight (Integer/parseInt weight)
          :children (if (some? children) (set children) #{})}]))
-
-(def input-tree (->> (map parse-line input-lines) (into {})))
 
 (defn root [tree]
   (->> tree vals
@@ -52,7 +48,9 @@
         (-> (make-message nested-cn c-balances) (Exception.) throw)))))
 
 (defn solve []
-  {:part-1 (root input-tree)
-   :part-2 (try
-            (-> input-tree nested check-balance)
-            (catch Exception e (.getMessage e)))})
+  (let [input-lines (-> "2017-7" io/resource io/reader line-seq)
+        input-tree (->> (map parse-line input-lines) (into {}))]
+    {:part-1 (root input-tree)
+     :part-2 (try
+              (-> input-tree nested check-balance)
+              (catch Exception e (.getMessage e)))}))
