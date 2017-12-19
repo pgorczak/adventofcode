@@ -5,32 +5,20 @@
 (defn parse-line [s]
   (->> (str/split s #" ") last (Integer/parseInt)))
 
-(defn make-generator [factor start]
-  (->> start
-       (iterate (fn [prev] (-> (* prev factor) (mod 2147483647))))
-       (drop 1)))
-
-(defn match?
-  ([vs] (->> vs (map #(rem % 65536)) (apply =)))
-  ([a b] (match? [a b])))
-
-(defn multiple? [x y]
-  (zero? (rem x y)))
+(defn match? [a b]
+  (= (bit-and a 0xFFFF) (bit-and b 0xFFFF)))
 
 (defn judge [as bs n]
   (->> (map match? as bs) (take n) (filter true?) count))
 
-(def factor-a 16807)
-(def factor-b 48271)
+(defn gen-a [x] (rem (* x 16807) 2147483647))
+(defn gen-b [x] (rem (* x 48271) 2147483647))
+(defn gen [gen-fn x0] (drop 1 (iterate gen-fn x0)))
+(defn gen-multiples [gen-fn x0 a] (filter #(zero? (rem % a)) (gen gen-fn x0)))
 
 (defn solve []
-  (let [input (->> "2017-15" io/resource io/reader line-seq
-                   (map parse-line))
-        [start-a start-b] input
-        as (make-generator factor-a start-a)
-        bs (make-generator factor-b start-b)]
-    ; can't run both in one go (GC overhead limit exceeded)
-    {:part-1 (judge as bs 40000000)
-     :part-2 (judge (filter #(multiple? % 4) as)
-                    (filter #(multiple? % 8) bs)
-                    5000000)}))
+  (let [[a0 b0] (->> "2017-15" io/resource io/reader line-seq (map parse-line))]
+    {:part-1 (judge (gen gen-a a0) (gen gen-b b0) 40e6)
+     :part-2 (judge (gen-multiples gen-a a0 4)
+                    (gen-multiples gen-b b0 8)
+                    5e6)}))
