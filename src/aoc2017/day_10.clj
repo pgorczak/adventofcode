@@ -19,6 +19,16 @@
                :skip (inc skip)}
               lengths)))))
 
+(defn knot-hash [s]
+  (->> (concat (map int s) [17 31 73 47 23])
+       (repeat 64)
+       (reduce braid (braid))
+       :hash
+       (partition 16)
+       (map #(apply bit-xor %))
+       (map #(format "%02x" %))
+       (apply str)))
+
 (defn solve []
   (let [input (-> "2017-10" io/resource slurp str/trim)]
     {:part-1 (->> (str/split input #",")
@@ -27,11 +37,4 @@
                   :hash
                   (take 2)
                   (apply *))
-     :part-2 (->> (concat (map int input) [17 31 73 47 23])
-                  (repeat 64)
-                  (reduce braid (braid))
-                  :hash
-                  (partition 16)
-                  (map #(apply bit-xor %))
-                  (map #(format "%02x" %))
-                  (apply str))}))
+     :part-2 (knot-hash input)}))
