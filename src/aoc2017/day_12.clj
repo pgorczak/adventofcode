@@ -12,11 +12,14 @@
     [(Integer/parseInt from) {:pipes (map #(Integer/parseInt %) to)}]))
 
 (defn flood-fill [graph-map seed]
-  (if (-> graph-map (get seed) :visited some?)
-    graph-map
-    (reduce flood-fill
-            (assoc-in graph-map [seed :visited] true)
-            (get-in graph-map [seed :pipes]))))
+  (loop [[x & stack] [seed]
+         gm graph-map]
+    (cond
+      (nil? x) gm
+      (-> gm (get x) :visited some?) (recur stack gm)
+      :else (recur
+             (->> (get-in gm [x :pipes]) (into stack))
+             (assoc-in gm [x :visited] true)))))
 
 (defn cluster-groups [graph-map]
   (loop [graph-map graph-map
