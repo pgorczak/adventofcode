@@ -2,12 +2,11 @@
   (:require [aoc-utils]))
 
 (defn first-twice [input]
-  (loop [freq 0
-         seen #{}
-         [change & rest] (cycle input)]
-    (if (contains? seen freq)
+  (loop [[freq & rest] (->> input cycle (reductions + 0))
+         seen #{}]
+    (if (seen freq)
       freq
-      (recur (+ freq change) (conj seen freq) rest))))
+      (recur rest (conj seen freq)))))
 
 (defn solve []
   (let [input (map #(Integer/parseInt %) (aoc-utils/lines "2018-1"))]
