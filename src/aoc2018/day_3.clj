@@ -14,35 +14,21 @@
         iy (range y (+ y h))]
     [ix iy]))
 
-(defn count-overlaps [claims]
-  (->> claims
-       (map unroll-claim)
-       (apply concat)
-       frequencies
-       vals
-       (filter #(>= % 2))
-       count))
+(defn update-claim [old {id :id}]
+  (if (some? old) (conj old id) #{id}))
 
-(defn overlap? [{x1 :x y1 :y w1 :w h1 :h} {x2 :x y2 :y w2 :w h2 :h}]
-  (and (< x1 (+ x2 w2)) (> (+ x1 w1) x2)
-       (< y1 (+ y2 h2)) (> (+ y1 h1) y2)))
-
-(defn intact-claims [claims]
-  (loop [[c & next-claims] claims
-         overlaps #{}
-         intacts #{}]
-    (if-not c
-      intacts
-      (let [new-overlaps (->> intacts (filter (partial overlap? c)) set)
-            c-overlap? (or (not-empty new-overlaps)
-                           (some (partial overlap? c) overlaps))
-            next-overlaps (union overlaps new-overlaps)
-            next-intacts (difference intacts new-overlaps)]
-        (if c-overlap?
-          (recur next-claims (conj next-overlaps c) next-intacts)
-          (recur next-claims next-overlaps (conj next-intacts c)))))))
+(defn merge-claims [claims]
+  (reduce (fn [acc c]
+            (reduce (fn [acc xy] (update acc xy update-claim c))
+                    acc
+                    (unroll-claim c)))
+          {}
+          claims))
 
 (defn solve []
-  (let [input (->> (aoc-utils/lines "2018-3") (map parse-claim))]
-    {:part-1 (count-overlaps input)
-     :part-2 (-> (intact-claims input) first :id)}))
+  (let [input (->> (aoc-utils/lines "2018-3") (map parse-claim))
+        claims (merge-claims input)]
+    {:part-1 (->> claims vals (map count) (filter #(>= % 2)) count)
+     :part-2 (difference
+              (->> input (map :id) set)
+              (->> claims vals (filter #(> (count %) 1)) (apply union)))}))
