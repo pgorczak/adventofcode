@@ -18,5 +18,6 @@
     (let [[year day] (map #(Integer/parseInt %) args)]
       (println (solve year day)))
     (catch Exception e
-      (println (->> [usage "" "" e] (string/join \newline)))
+      (println (str usage "\n\n"))
+      (println e)
       (System/exit 1))))
