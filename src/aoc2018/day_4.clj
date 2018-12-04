@@ -14,11 +14,7 @@
              :guard (->> msg (re-find #"#(\d+)") second (Integer/parseInt))))))
 
 (defn minutes-between [t1 t2]
-  (let [t1-hr (.getHours t1)
-        t2-min (.getMinutes t2)]
-    (if (zero? t1-hr)
-      (range (.getMinutes t1) t2-min)
-      (range 0 t2-min))))
+  (range (.getMinutes t1) (.getMinutes t2)))
 
 (defn sleep-times [log]
   (loop [[{t :type d :date :as e} & log] log
@@ -27,14 +23,9 @@
          stats {}]
     (if e
       (case t
-        :wake (if sleep
-                (recur log guard nil
-                       (update stats guard
-                               (partial concat (minutes-between sleep d))))
-                (recur log guard sleep stats))
-        :sleep (if sleep
-                 (recur log guard sleep stats)
-                 (recur log guard d stats))
+        :wake (recur log guard nil
+                     (update stats guard #(concat % (minutes-between sleep d))))
+        :sleep (recur log guard d stats)
         :begin (recur log (:guard e) nil stats))
       (zipmap (keys stats) (->> (vals stats) (map frequencies))))))
 
