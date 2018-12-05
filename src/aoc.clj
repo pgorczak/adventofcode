@@ -16,7 +16,7 @@
 (defn -main [& args]
   (try
     (let [[year day] (map #(Integer/parseInt %) args)]
-      (println (solve year day))
+      (println (time (solve year day)))
       (shutdown-agents))
     (catch Exception e
       (println (str usage "\n\n"))
