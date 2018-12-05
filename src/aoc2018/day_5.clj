@@ -10,7 +10,10 @@
          [x & right] p]
     (cond
       (nil? right) (conj left x)
-      (react? x (first right)) (recur [] (concat left (rest right)))
+      (react? x (first right)) (if (empty? left)
+                                 (recur left (rest right))
+                                 (recur (pop left)
+                                        (conj (rest right) (peek left))))
       :else (recur (conj left x) right))))
 
 (defn solve []
@@ -18,6 +21,6 @@
     {:part-1 (-> input react count)
      :part-2 (->> input (map lower-case) set
                   (map (fn [u] (filter #(not= (lower-case %) u) input)))
-                  (pmap react)
+                  (map react)
                   (map count)
                   (apply min))}))
