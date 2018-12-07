@@ -2,17 +2,24 @@
   (:require [clojure.set :refer [difference]]
             [aoc-utils]))
 
-(defn sort-steps [is]
-  (loop [is is
-         remaining (-> (apply concat is) set)
-         ordered []]
+(defn topo-reduce [f instrs]
+  (loop [instrs instrs
+         remaining (-> (apply concat instrs) set)
+         acc {}]
     (if (empty? remaining)
-      (apply str ordered)
-      (let [blocked (-> (map second is) set)
-            ready (-> (difference remaining blocked) sort first)]
-        (recur (remove #(= ready (first %)) is)
-               (disj remaining ready)
-               (conj ordered ready))))))
+      acc
+      (let [blocked (-> (map second instrs) set)
+            ready (difference remaining blocked)
+            [acc done in-progress] (f acc ready)]
+        (recur (remove #(contains? done (first %)) instrs)
+               (difference remaining done in-progress)
+               acc)))))
+
+(defn steps [acc ready]
+  (let [done (-> ready sort first)]
+    [(update acc :order conj done)
+     #{done}
+     #{}]))
 
 (defn step-time [s]
   (+ 61 (- (int s) (int \A))))
@@ -20,27 +27,22 @@
 (defn update-all [f m]
   (zipmap (keys m) (map f (vals m))))
 
-(defn process [is]
-  (loop [is is
-         remaining (-> (apply concat is) set)
-         working {}
-         secs 0]
-    (if (empty? remaining)
-      secs
-      (let [blocked (-> (map second is) set)
-            ready (difference remaining blocked)
-            working (->> (take (- 5 (count working)) ready)
-                         (map (fn [s] [s (step-time s)]))
-                         (into working))
-            [step done'] (->> (group-by val working) (apply min-key key))
-            done (->> done' (map first) set)]
-        (recur (remove #(contains? done (first %)) is)
-               (difference remaining (-> working keys set))
-               (->> (apply dissoc working done) (update-all #(- % step)))
-               (+ secs step))))))
+(defn process [acc ready]
+  (let [working (get acc :working {})
+        secs (get acc :secs 0)
+        working (->> (take (- 5 (count working)) ready)
+                     (map (fn [s] [s (step-time s)]))
+                     (into working))
+        [step done'] (->> (group-by val working) (apply min-key key))
+        done (->> done' (map first) set)]
+    [(assoc acc
+            :working (->> (apply dissoc working done) (update-all #(- % step)))
+            :secs (+ secs step))
+     done
+     (-> working keys set)]))
 
 (defn solve []
   (let [input (->> (aoc-utils/lines "2018-7")
                    (map (fn [i] [(nth i 5) (nth i 36)])))]
-    {:part-1 (sort-steps input)
-     :part-2 (process input)}))
+    {:part-1 (->> (topo-reduce steps input) :order reverse (apply str))
+     :part-2 (->> (topo-reduce process input) :secs)}))
