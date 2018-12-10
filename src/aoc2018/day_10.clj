@@ -28,18 +28,13 @@
       (recur (conj xs x2)))))
 
 (defn sky->str [s]
-  (let [{:keys [x-min x-max y-min y-max]} (extents s)]
-    (loop [sky (->> (zipmap (range y-min (inc y-max))
-                           (repeat (->> (zipmap (range x-min (inc x-max))
-                                               (repeat \space))
-                                        (into (sorted-map)))))
-                    (into (sorted-map)))
-           [{:keys [x y]} & s] s]
-      (if (some? x)
-        (recur (assoc-in sky [y x] \#) s)
-        (->> (vals sky)
-             (map #(apply str (vals %)))
-             (clojure.string/join \newline))))))
+  (let [{:keys [x-min x-max y-min y-max]} (extents s)
+        stars (->> s (map (juxt :x :y)) set)]
+    (->> (for [y (range y-min (inc y-max))]
+           (for [x (range x-min (inc x-max))]
+             (if (contains? stars [x y]) \# \space)))
+         (map #(apply str %))
+         (clojure.string/join \newline))))
 
 (defn solve []
   (let [input (->> (aoc-utils/lines "2018-10") (map parse-entry))
