@@ -13,16 +13,16 @@
        (map plant-indexes)
        (map #(-> (for [i %] (- i 2)) set))))
 
-(defn applies? [rule state i]
+(defn grow? [rules state i]
   (->> (range (- i 2) (+ i 3))
        (keep state)
        (map #(- % i))
        set
-       (= rule)))
+       ((fn [s] (some #(= s %) rules)))))
 
 (defn evolve [rules state]
   (->> (range (- (apply min state) 3) (+ (apply max state) 4))
-       (filter (fn [i] (some #(applies? % state i) rules)))
+       (filter #(grow? rules state %))
        set))
 
 (defn solve []
