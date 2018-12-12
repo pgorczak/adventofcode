@@ -27,10 +27,22 @@
             (map #(rect-get g n n %) top-left))))
 
 (defn all-squares [g]
-  (->> (range 1 300)
-       (pmap (fn [n] (println n) (for [[[x y] v] (squares g n)] [[x y n] v])))
-       (apply concat)
-       (into {})))
+  (loop [[n & ns] (range 2 300)
+         sqs (->> (squares g 1) (map (fn [[xy v]] [(conj xy 1) v])) (into {}))]
+    (println n)
+    (if (nil? n)
+      sqs
+      (let [max-i (- 300 (dec n))
+            top-left (for [y (range max-i) x (range max-i)] [x y n])]
+        (recur
+         ns
+         (->> top-left
+              (map (fn [[x y n :as k]]
+                     [k
+                      (+ (get sqs [x y (dec n)])
+                         (rect-get g n 1 [x (+ y (dec n))])
+                         (rect-get g 1 (dec n) [(+ x (dec n)) y]))]))
+              (into sqs)))))))
 
 (defn max-coord [x]
   (->> x (apply max-key val) key (str/join \,)))
