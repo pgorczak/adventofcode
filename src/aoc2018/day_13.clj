@@ -36,22 +36,17 @@
 (defn tick [layout carts]
   (loop [[[rc [d ts]] & carts] carts
          carts' (sorted-map)]
-    (if (nil? rc)
+    (cond
+      (nil? rc)
       carts'
+      (= \X d)
+      (recur carts (assoc carts' rc [d ts]))
+      :else
       (let [rc' (move d rc)
             dts' (turn (get layout rc') d ts)]
         (if (contains? carts' rc')
-          (assoc carts' rc' [\X ts])
+          (recur carts (assoc carts' rc' [\X ts]))
           (recur carts (assoc carts' rc' dts')))))))
-
-(defn print-layout [layout carts]
-  (let [carts (->> (for [[rc [d _]] carts] [rc d]) (into {}))]
-    (doseq [r (range 6)]
-      (->> (for [c (range 13)] [r c])
-           (map (some-fn carts layout (constantly \space)))
-           (apply str)
-           (println)))
-    (println)))
 
 (defn without-turns [carts]
   (reduce-kv (fn [m k v] (assoc m k (first v))) (sorted-map) carts))
