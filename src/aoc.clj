@@ -7,8 +7,19 @@
         "Usage: aoc YEAR DAY"]
        (string/join \newline)))
 
+(defn ns-til-2019 [year day]
+  (str "aoc" year ".day-" day))
+
+(defn ns-from-2020 [year day]
+  (str "aoc" year ".day-" (format "%02d" day)))
+
+(defn make-ns [year day]
+  (cond
+    (< year 2020) (ns-til-2019 year day)
+    :else (ns-from-2020 year day)))
+
 (defn solve [year day]
-  (let [ns (str "aoc" year ".day-" day)
+  (let [ns (make-ns year day)
         _ (require (symbol ns))
         solve (resolve (symbol ns "solve"))]
     (solve)))
