@@ -1,5 +1,4 @@
-(ns aoc2020.day-02
-  (:require [aoc-utils]))
+(ns aoc2020.day-02)
 
 (defn parse-entry [l]
   (let [[_ lo hi ch pw] (re-find #"(\d+)-(\d+)\ ([a-z]):\ ([a-z]+)" l)]
@@ -13,7 +12,7 @@
         pos2 (= c (nth pw (dec hi)))]
     (and (or pos1 pos2) (not (and pos1 pos2)))))
 
-(defn solve []
-  (let [input (map parse-entry (aoc-utils/lines "2020-02"))]
-    {:part-1 (->> input (filter valid-1?) count)
-     :part-2 (->> input (filter valid-2?) count)}))
+(defn solve [input]
+  (let [entries (->> input line-seq (map parse-entry))]
+    {:part-1 (->> entries (filter valid-1?) count)
+     :part-2 (->> entries (filter valid-2?) count)}))

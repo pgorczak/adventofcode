@@ -1,5 +1,4 @@
-(ns aoc2020.day-01
-  (:require [aoc-utils]))
+(ns aoc2020.day-01)
 
 (defn combinations
   "Generates all combinations of k elements from vector v."
@@ -20,7 +19,7 @@
        (filter #(= x (apply + %)))
        first))
 
-(defn solve []
-  (let [input (mapv #(Integer/parseInt %) (aoc-utils/lines "2020-01"))]
-    {:part-1 (->> (sum-to 2020 input 2) (apply *))
-     :part-2 (->> (sum-to 2020 input 3) (apply *))}))
+(defn solve [input]
+  (let [v (->> input line-seq (mapv #(Integer/parseInt %)))]
+    {:part-1 (->> (sum-to 2020 v 2) (apply *))
+     :part-2 (->> (sum-to 2020 v 3) (apply *))}))

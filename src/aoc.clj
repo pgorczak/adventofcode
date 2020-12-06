@@ -22,7 +22,12 @@
   (let [ns (make-ns year day)
         _ (require (symbol ns))
         solve (resolve (symbol ns "solve"))]
-    (solve)))
+    (if (< year 2020)
+      (solve)
+      (-> (format "%04d-%02d" year day)
+          clojure.java.io/resource
+          clojure.java.io/reader
+          solve))))
 
 (defn -main [& args]
   (try
